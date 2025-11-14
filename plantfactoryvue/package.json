@@ -1,0 +1,43 @@
+{
+  "name": "plantfactoryvue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^7.0.0",
+    "@vueuse/core": "^10.7.0",
+    "ant-design-vue": "^4.0.0",
+    "axios": "^1.6.0",
+    "dayjs": "^1.11.10",
+    "echarts": "^5.4.3",
+    "pinia": "^2.1.7",
+    "vue": "^3.5.22",
+    "vue-echarts": "^6.6.1",
+    "vue-router": "^4.6.3",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "less": "^4.4.2",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.0",
+    "unplugin-auto-import": "^0.17.2",
+    "unplugin-vue-components": "^0.25.2",
+    "vite": "^7.1.11",
+    "vite-plugin-vue-devtools": "^8.0.3",
+    "vue-tsc": "^1.8.22"
+  }
+}

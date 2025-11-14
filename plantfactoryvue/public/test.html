@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>登录测试</title>
+</head>
+<body>
+    <h1>登录状态测试</h1>
+    <div id="status"></div>
+    <div id="userInfo"></div>
+    <div id="token"></div>
+
+    <button onclick="testLogin()">测试登录</button>
+    <button onclick="checkStorage()">检查存储</button>
+    <button onclick="clearStorage()">清除存储</button>
+
+    <script>
+        function testLogin() {
+            const loginData = {
+                username: 'admin',
+                password: '123456'
+            };
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('登录结果:', data);
+                if (data.code === 200) {
+                    localStorage.setItem('token', data.data.accessToken);
+                    localStorage.setItem('userInfo', JSON.stringify({
+                        id: data.data.userId,
+                        username: data.data.username,
+                        realName: data.data.realName
+                    }));
+                    checkStorage();
+                }
+            })
+            .catch(error => console.error('登录错误:', error));
+        }
+
+        function checkStorage() {
+            const token = localStorage.getItem('token');
+            const userInfo = localStorage.getItem('userInfo');
+
+            document.getElementById('token').textContent = 'Token: ' + (token ? token.substring(0, 50) + '...' : '无');
+            document.getElementById('userInfo').textContent = '用户信息: ' + userInfo || '无';
+            document.getElementById('status').textContent = '登录状态: ' + (token ? '已登录' : '未登录');
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            checkStorage();
+        }
+
+        // 页面加载时检查状态
+        checkStorage();
+    </script>
+</body>
+</html>

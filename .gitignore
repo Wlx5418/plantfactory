@@ -1,0 +1,28 @@
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+nul
+gh-installer.msi
+
+# Claude files
+.claude/
+
+# Node modules (if any)
+node_modules/
+
+# Maven target (if any)
+target/
+
+# Build outputs
+*.class
+*.jar
