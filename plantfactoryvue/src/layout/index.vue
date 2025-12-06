@@ -13,48 +13,7 @@
         <span v-if="!sidebarCollapsed" class="logo-text">植物工厂</span>
       </div>
 
-      <a-menu
-        v-model:selectedKeys="selectedMenuKeys"
-        :mode="isMobile ? 'vertical' : 'inline'"
-        :theme="theme === 'dark' ? 'dark' : 'light'"
-        class="layout-menu"
-        @click="handleMenuClick"
-      >
-        <a-menu-item key="/dashboard">
-          <template #icon>
-            <DashboardOutlined />
-          </template>
-          <span>仪表盘</span>
-        </a-menu-item>
-
-        <a-menu-item key="/production/area">
-          <template #icon>
-            <HomeOutlined />
-          </template>
-          <span>生产区域</span>
-        </a-menu-item>
-
-        <a-menu-item key="/production/monitoring">
-          <template #icon>
-            <EyeOutlined />
-          </template>
-          <span>环境监控</span>
-        </a-menu-item>
-
-        <a-menu-item key="/data/analysis">
-          <template #icon>
-            <BarChartOutlined />
-          </template>
-          <span>数据分析</span>
-        </a-menu-item>
-
-        <a-menu-item key="/system/settings">
-          <template #icon>
-            <SettingOutlined />
-          </template>
-          <span>系统设置</span>
-        </a-menu-item>
-      </a-menu>
+      <AppMenu :mode="isMobile ? 'vertical' : 'inline'" :theme="theme === 'dark' ? 'dark' : 'light'" />
     </a-layout-sider>
 
     <!-- 主内容区 -->
@@ -157,11 +116,15 @@
       <!-- 页面内容 -->
       <a-layout-content class="layout-content">
         <div class="content-wrapper">
-          <router-view v-slot="{ Component, route }">
+          <router-view />
+          <!-- 或者带过渡效果的写法 -->
+          <!--
+          <router-view v-slot="{ Component }">
             <transition name="fade-slide" mode="out-in">
-              <component :is="Component" :key="route.path" />
+              <component :is="Component" />
             </transition>
           </router-view>
+          -->
         </div>
       </a-layout-content>
     </a-layout>
@@ -175,12 +138,7 @@ import { Modal } from 'ant-design-vue'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  HomeOutlined,
   UserOutlined,
-  DashboardOutlined,
-  EyeOutlined,
-  BarChartOutlined,
-  SettingOutlined,
   LogoutOutlined,
   DownOutlined,
   BulbOutlined,
@@ -189,6 +147,7 @@ import {
 } from '@ant-design/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
+import AppMenu from './components/AppMenu.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -204,21 +163,11 @@ const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const theme = computed(() => appStore.theme)
 const showBreadcrumb = computed(() => appStore.settings.showBreadcrumb)
 const showTabs = computed(() => appStore.settings.showTabs)
-const selectedMenuKeys = computed(() => [route.path])
-const openMenuKeys = computed(() => [])
 const tabs = computed(() => appStore.tabs)
 const activeTabKey = computed(() => appStore.activeTabKey)
 const userInfo = computed(() => userStore.userInfo)
 const displayName = computed(() => userStore.displayName)
 
-// 菜单路由
-const menuRoutes = computed(() => {
-  return router.options.routes.filter(route =>
-    route.meta &&
-    !route.meta.hideInMenu &&
-    route.meta.title !== '登录'
-  )
-})
 
 // 面包屑列表
 const breadcrumbList = computed(() => {
@@ -246,10 +195,6 @@ const toggleFullscreen = () => {
   }
 }
 
-const handleMenuClick = ({ key }) => {
-  // 简化的菜单点击处理，直接跳转
-  router.push(key)
-}
 
 const handleTabClick = (key) => {
   router.push(key)
@@ -282,12 +227,9 @@ const handleLogout = () => {
   })
 }
 
-// 监听路由变化，更新菜单和标签页
+// 监听路由变化，更新标签页
 watch(route, (newRoute) => {
   if (newRoute.meta?.title) {
-    // 更新菜单选中状态
-    appStore.setSelectedMenuKeys([newRoute.path])
-
     // 添加标签页
     if (showTabs.value) {
       appStore.addTab({

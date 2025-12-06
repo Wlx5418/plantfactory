@@ -44,8 +44,8 @@ request.interceptors.response.use(
     }
 
     // 检查业务状态码
-    if (data.code === 200) {
-      return data
+    if (data.code === 200 || data.code === 201) {
+      return data.data
     } else {
       // 业务错误
       const errorMessage = data.message || '请求失败'

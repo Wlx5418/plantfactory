@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, h } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 // import VChart from 'vue-echarts'
 // import { use } from 'echarts/core'

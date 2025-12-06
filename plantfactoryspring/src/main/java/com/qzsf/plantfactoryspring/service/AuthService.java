@@ -5,7 +5,7 @@ import com.qzsf.plantfactoryspring.dto.auth.LoginRequest;
 import com.qzsf.plantfactoryspring.dto.auth.LoginResponse;
 import com.qzsf.plantfactoryspring.entity.User;
 import com.qzsf.plantfactoryspring.repository.UserRepository;
-import com.qzsf.plantfactoryspring.util.JwtUtil;
+import com.qzsf.plantfactoryspring.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 认证服务
+ * 简化版认证服务 - 先修复登录问题
  *
  * @author Plant Factory Team
  * @since 3.0.0
@@ -40,7 +40,7 @@ public class AuthService {
     private Long jwtExpiration;
 
     /**
-     * 用户登录
+     * 用户登录 - 简化版本
      *
      * @param loginRequest 登录请求
      * @return 登录响应
@@ -53,28 +53,50 @@ public class AuthService {
         log.debug("用户登录请求: {}", username);
 
         try {
-            // 进行身份验证
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-            );
+            // 直接从数据库验证用户
+            User user = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new BadCredentialsException("用户名或密码错误"));
 
-            // 获取认证成功的用户信息
-            User user = (User) authentication.getPrincipal();
+            // 验证密码
+            log.debug("输入密码: {}, 数据库密码: {}", password, user.getPassword());
+
+            // 验证密码
+            boolean passwordMatch = passwordEncoder.matches(password, user.getPassword());
+            log.debug("密码匹配结果: {} (输入密码: {}, 数据库密码: {})", passwordMatch, password, user.getPassword());
+
+            if (!passwordMatch) {
+                throw new BadCredentialsException("用户名或密码错误");
+            }
 
             // 检查用户状态
-            if (!user.isEnabled()) {
+            if (user.getStatus() != User.UserStatus.ACTIVE) {
                 throw new BadCredentialsException("用户账户已被禁用");
             }
 
             // 生成JWT令牌
-            String accessToken = jwtUtil.generateAccessToken(username);
-            String refreshToken = jwtUtil.generateRefreshToken(username);
+            String[] roleArray = user.getRoleCodes().toArray(new String[0]);
+            org.springframework.security.core.userdetails.UserDetails userDetails =
+                org.springframework.security.core.userdetails.User.builder()
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .roles(roleArray)
+                    .build();
+
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
             // 更新最后登录时间
-            userRepository.updateLastLoginTime(user.getId(), LocalDateTime.now());
+            user.setLastLoginTime(LocalDateTime.now());
+            userRepository.save(user);
 
             // 构建用户信息DTO
-            UserDTO userDTO = UserDTO.fromEntity(user);
+            UserDTO userDTO = UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .realName(user.getRealName())
+                .status(user.getStatus().toString())
+                .build();
 
             // 构建登录响应
             return LoginResponse.builder()
@@ -83,8 +105,6 @@ public class AuthService {
                     .expiresIn(jwtExpiration / 1000) // 转换为秒
                     .userInfo(userDTO)
                     .loginTime(LocalDateTime.now())
-                    .permissions(user.getPermissionCodes())
-                    .roles(user.getRoleCodes())
                     .build();
 
         } catch (AuthenticationException e) {

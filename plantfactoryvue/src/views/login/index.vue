@@ -131,15 +131,15 @@ const handleLogin = async (values) => {
     // 调用登录API
     const response = await userStore.loginAction(formData)
 
-    // 检查登录响应
-    if (response && response.code === 200) {
+    // 检查登录响应 - axios拦截器已经处理了成功的情况，直接返回data
+    if (response && response.accessToken) {
       message.success('登录成功')
 
       // 如果有重定向地址，跳转到重定向地址
       const redirect = route.query.redirect || '/dashboard'
       router.push(redirect)
     } else {
-      throw new Error(response?.message || '登录失败')
+      throw new Error('登录失败')
     }
 
   } catch (error) {

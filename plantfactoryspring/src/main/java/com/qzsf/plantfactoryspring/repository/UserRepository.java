@@ -97,4 +97,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u FROM User u WHERE u.isDeleted = false ORDER BY u.createdAt DESC")
     List<User> findRecentUsers(Pageable pageable);
+
+    /**
+     * 根据用户名查找用户（排除已删除的用户），同时加载角色信息
+     * 用于Spring Security认证，避免懒加载异常
+     */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username AND u.isDeleted = false")
+    Optional<User> findByUsernameWithRoles(@Param("username") String username);
 }

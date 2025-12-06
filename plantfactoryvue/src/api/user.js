@@ -104,6 +104,23 @@ export function restoreUser(id) {
   })
 }
 
+// 批量删除用户
+export function batchDeleteUsers(userIds) {
+  return request({
+    url: '/users/batch',
+    method: 'delete',
+    data: { userIds }
+  })
+}
+
+// 获取用户状态选项
+export function getUserStatusOptions() {
+  return request({
+    url: '/users/status-options',
+    method: 'get'
+  })
+}
+
 // 搜索用户
 export function searchUsers(params) {
   return request({

@@ -1,6 +1,8 @@
 package com.qzsf.plantfactoryspring.repository;
 
 import com.qzsf.plantfactoryspring.entity.Role;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -61,4 +63,19 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
      */
     @Query("SELECT r FROM Role r JOIN User u WHERE u.id = :userId AND r MEMBER OF u.roles")
     List<Role> findByUserId(@Param("userId") Long userId);
+
+    /**
+     * 根据角色名称模糊查询角色（分页）
+     */
+    Page<Role> findByRoleNameContainingIgnoreCase(String roleName, Pageable pageable);
+
+    /**
+     * 根据状态查询角色（分页）
+     */
+    Page<Role> findByStatus(Role.RoleStatus status, Pageable pageable);
+
+    /**
+     * 根据角色名称和状态查询角色（分页）
+     */
+    Page<Role> findByRoleNameContainingIgnoreCaseAndStatus(String roleName, Role.RoleStatus status, Pageable pageable);
 }

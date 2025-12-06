@@ -141,6 +141,9 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher("/v1/environment/data/range")
                     ).permitAll()
 
+                    // WebSocket连接需要JWT认证（在握手阶段验证）
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/ws/**")).authenticated()
+
                     // 管理员接口
                     .requestMatchers(AntPathRequestMatcher.antMatcher("/admin/**")).hasRole("ADMIN")
 

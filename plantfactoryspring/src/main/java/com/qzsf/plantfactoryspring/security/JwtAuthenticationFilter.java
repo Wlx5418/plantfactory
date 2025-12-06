@@ -1,7 +1,7 @@
 package com.qzsf.plantfactoryspring.security;
 
 import com.qzsf.plantfactoryspring.service.UserDetailsServiceImpl;
-import com.qzsf.plantfactoryspring.util.JwtUtil;
+import com.qzsf.plantfactoryspring.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,7 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 // 验证令牌
-                if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+                if (jwtUtil.validateToken(jwt, userDetails)) {
                     // 创建认证令牌
                     UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(

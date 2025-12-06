@@ -17,6 +17,10 @@ export const useUserStore = defineStore('user', () => {
   const hasPermission = computed(() => (permission) => {
     return permissions.value.includes(permission) || permissions.value.includes('ADMIN')
   })
+
+  const hasRole = computed(() => (role) => {
+    return userInfo.value?.role === role || permissions.value.includes('ADMIN')
+  })
   const displayName = computed(() => {
     return userInfo.value?.realName || userInfo.value?.username || '未知用户'
   })
@@ -40,31 +44,48 @@ export const useUserStore = defineStore('user', () => {
   const loginAction = async (loginForm) => {
     try {
       const response = await login(loginForm)
-      if (response.code === 200) {
-        const { accessToken: tokenValue, userId, username, realName } = response.data
+
+      // axios拦截器已经处理了response.code === 200的情况，直接返回了data部分
+      // 所以这里response就是后端返回的data对象
+      if (response && response.accessToken) {
+        const { accessToken: tokenValue, userInfo } = response
 
         // 设置token
         setToken(tokenValue)
 
-        // 设置用户信息
+        // 设置用户信息 - 修复数据解析问题
+        const userRole = userInfo?.roles?.[0] || 'USER'
         setUserInfo({
-          id: userId,
-          username,
-          realName,
-          email: response.data.email || null,
-          phone: response.data.phone || null
+          id: userInfo?.id,
+          username: userInfo?.username,
+          realName: userInfo?.realName,
+          role: userRole,
+          email: userInfo?.email || null,
+          phone: userInfo?.phone || null
         })
 
         // 根据用户角色设置权限
         const userPermissions = ['USER']
-        if (username === 'admin' || userId === 1) {
+
+        // 简化逻辑：admin用户直接给予ADMIN权限
+        if (userInfo?.username === 'admin' || userInfo?.id === 1) {
           userPermissions.push('ADMIN')
+        } else if (userRole === 'ADMIN') {
+          userPermissions.push('ADMIN')
+        } else if (userInfo?.roles) {
+          // 检查角色编码是否为ADMIN
+          const hasAdminRole = Array.from(userInfo.roles).some(role =>
+            role.roleCode === 'ADMIN' || role.roleName === '系统管理员'
+          )
+          if (hasAdminRole) {
+            userPermissions.push('ADMIN')
+          }
         }
 
         setPermissions(userPermissions)
-        return response.data
+        return response
       } else {
-        throw new Error(response.message || '登录失败')
+        throw new Error('登录响应格式异常')
       }
     } catch (error) {
       console.error('登录失败:', error)
@@ -164,6 +185,7 @@ export const useUserStore = defineStore('user', () => {
     // 计算属性
     isLoggedIn,
     hasPermission,
+    hasRole,
     displayName,
 
     // 方法

@@ -3,7 +3,7 @@ package com.qzsf.plantfactoryspring.controller;
 import com.qzsf.plantfactoryspring.dto.auth.LoginRequest;
 import com.qzsf.plantfactoryspring.dto.auth.LoginResponse;
 import com.qzsf.plantfactoryspring.service.AuthService;
-import com.qzsf.plantfactoryspring.util.JwtUtil;
+import com.qzsf.plantfactoryspring.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +37,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 
+  
     /**
      * 用户登录
      *
@@ -76,6 +77,7 @@ public class AuthController {
         }
     }
 
+    
     /**
      * 用户登出
      *

@@ -35,7 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.debug("正在加载用户详情: {}", username);
 
-        return userRepository.findByUsernameAndIsDeletedFalse(username)
+        return userRepository.findByUsernameWithRoles(username)
                 .orElseThrow(() -> {
                     log.warn("用户不存在或已被删除: {}", username);
                     return new UsernameNotFoundException("用户名或密码错误");
